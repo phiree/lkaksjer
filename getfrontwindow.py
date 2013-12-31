@@ -15,19 +15,24 @@ from win32process import *
 from psutil import *
 from threading import Thread
 class GetActivityInformation(Thread):
+    #repeatedTimes=1
     def __init__(self):
         self.stopped=False
         self.frenquency=5
+        #save to persistence frenquency
+        self.saveAfterFrenqencyTimes=12 #refrenquency = frenquency*12=60 secends
         self.preProcess=''
         self.entryList=[]
         Thread.__init__(self)
     def run(self):
         while not self.stopped:
             self.GetFrontWindowInfo()
-            for entry in self.entryList:
-               print(entry)
+            #if repeatedTimes%saveAfterFrenqencyTimes==0:
+            #   pass
+            # for entry in self.entryList:
+            print(self.entryList[-1])
             time.sleep(self.frenquency)
-
+            #repeatedTimes=repeatedTimes+1
     def GetFrontWindowInfo(self):
             hwnd=GetForegroundWindow()
             pinfo= GetWindowThreadProcessId(hwnd)
@@ -38,7 +43,7 @@ class GetActivityInformation(Thread):
                 pname='errwhengetname'
 
             wtext=GetWindowText(hwnd)
-            if wtext==self.preProcess:
+            if pname==self.preProcess:
                 self.lastTime+=self.frenquency
             else:
                 self.lastTime=0
@@ -53,10 +58,12 @@ if __name__=="__main__":
    info= GetActivityInformation()
    info.start()
    info.frenquency=4
-class SaveRecordEntry(Thread):
+class Persistence(Thread):
     '''save entry to server'''
     def __init__(self):
-        
+        pass
+    def SaveToLocal(self):
+        pass
 
 class RecordEntry:
     def __init__(self):
