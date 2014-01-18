@@ -1,46 +1,31 @@
 #!/usr/bin/env python
 #-*-coding: utf-8 -*-
-# 得到窗口标题
-'''from win32gui import *
-import timeit
-import win32process
-import time
-from threading import *
-'''
 
-import datetime
-import psutil,os,time
+import psutil,os,time,datetime
+from config import *
 from  GetFrontWindow import *
 from threading import *
-from persistenceFactory import *
+from persistence import *
+
 class GetActivityInformation(Thread):
     #repeatedTimes=1
-   
     def __init__(self):
         Thread.__init__(self)
         self.stopped=False
-        self.frenquency=5
-        #save to persistence frenquency
-        self.saveAfterFrenqencyTimes=12 #refrenquency = frenquency*12=60 secends
+        self.frenquency=frequency_readprocess
         self.preProcess=''
         self.totalEntry=0
         self.entryList=entryList
         self.myLock=myLock
        
-
     def run(self):
-        
-       
-       
         while not self.stopped:
+            time.sleep(self.frenquency)
             frontWindowInfo=wininfoFactory().GetFrontWindowInfo()
             #print(dir (wininfoFactory()))
             pname=frontWindowInfo[0]
             wtext=frontWindowInfo[1]
-            if pname==self.preProcess:
-                self.lastTime+=self.frenquency
-            else:
-                self.lastTime=0
+            self.lastTime=self.frenquency
             self.preProcess=pname
            # foreWindowText=GetClassName(hwnd)
             re=RecordEntry()
@@ -49,7 +34,6 @@ class GetActivityInformation(Thread):
             re.lastTime=self.lastTime
             self.myLock.acquire()
             self.entryList.append(re)
-           
             self.totalEntry+=1
             self.myLock.release()
             print("totalRecord:"+str(self.totalEntry))
@@ -57,7 +41,7 @@ class GetActivityInformation(Thread):
             #   pass
             # for entry in self.entryList:
             print(entryList[-1])
-            time.sleep(self.frenquency)
+            
        
             #repeatedTimes=repeatedTimes+1
 class PersistenceThread(Thread):
@@ -67,10 +51,8 @@ class PersistenceThread(Thread):
         Thread.__init__(self)
         self.t=0
         self.entryList=entryList
+        self.repeatFrenquency=frequency_savetolocal
     def run(self):
-       
-        
-        
         while True:
             myLock.acquire()
             self.t=self.t+len(self.entryList)
@@ -78,13 +60,10 @@ class PersistenceThread(Thread):
             del self.entryList[:]
             myLock.release()
             print("totalSaved:"+str(self.t))
-            time.sleep(3)
-            
-         
-        
-        
+            time.sleep(self.repeatFrenquency)
     def SaveToLocal(self,entryList):
         print("-----save start------")
+        
         CreatePersistence("sqlite").SaveToLocal(entryList)
         print(len(entryList))
 

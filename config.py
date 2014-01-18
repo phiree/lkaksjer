@@ -1,0 +1,2 @@
+frequency_readprocess=1
+frequency_savetolocal=2
