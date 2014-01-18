@@ -8,7 +8,6 @@ from threading import *
 from persistence import *
 
 class GetActivityInformation(Thread):
-    #repeatedTimes=1
     def __init__(self):
         Thread.__init__(self)
         self.stopped=False
@@ -22,12 +21,10 @@ class GetActivityInformation(Thread):
         while not self.stopped:
             time.sleep(self.frenquency)
             frontWindowInfo=wininfoFactory().GetFrontWindowInfo()
-            #print(dir (wininfoFactory()))
             pname=frontWindowInfo[0]
             wtext=frontWindowInfo[1]
             self.lastTime=self.frenquency
             self.preProcess=pname
-           # foreWindowText=GetClassName(hwnd)
             re=RecordEntry()
             re.pname=pname
             re.wtext=wtext
@@ -36,16 +33,8 @@ class GetActivityInformation(Thread):
             self.entryList.append(re)
             self.totalEntry+=1
             self.myLock.release()
-            print("totalRecord:"+str(self.totalEntry))
-            #if repeatedTimes%saveAfterFrenqencyTimes==0:
-            #   pass
-            # for entry in self.entryList:
-            print(entryList[-1])
-            
-       
-            #repeatedTimes=repeatedTimes+1
+
 class PersistenceThread(Thread):
-    
     '''save entry to server'''
     def __init__(self):
         Thread.__init__(self)
@@ -59,24 +48,21 @@ class PersistenceThread(Thread):
             PersistenceThread.SaveToLocal(self.entryList)
             del self.entryList[:]
             myLock.release()
-            print("totalSaved:"+str(self.t))
             time.sleep(self.repeatFrenquency)
     def SaveToLocal(self,entryList):
-        print("-----save start------")
-        
         CreatePersistence("sqlite").SaveToLocal(entryList)
-        print(len(entryList))
 
 class RecordEntry:
     def __init__(self):
-       ''' self.pname=''
-        self.wtext=''
-        self.lastTime=0'''
+       
        self.time=datetime.datetime.now()
+       pass
+       self.pname=''
+       self.wtext=''
+       self.lastTime=0
     
     def __str__(self):
         return self.pname+'--'+self.wtext+'--'+str(self.lastTime)+'--'+str(self.time)
-
 
 if __name__=="__main__":
     myLock=Lock()
